@@ -111,7 +111,9 @@ class core:
 							Log.info("Internal error: "+str(e))
 						
 				Log.info("Sending payload (GET) method...") # 发送请求
-				req=self.session.get(urljoin(self.url,action),params=keys)
+				req=self.session.get(urljoin(self.url,action),params=keys) # eq:url  http://192.168.0.104/xss/level2.php?keyword=%3Cscript%3Eprompt%28document.cookie%29%3C%2Fscript%3E&submit=submit
+				print(req)
+				print('-----------')
 				if self.payload in req.text:
 					Log.high("Detected XSS (GET) at "+urljoin(self.url,req.url))
 					Log.high("GET data: "+str(keys))
