@@ -71,11 +71,17 @@ class core:
 					Log.info("This page is safe from XSS (POST) attack but not 100% yet...")
 	
 	@classmethod
-	def get_method_form(self):
+	def get_method_form(self): # 测试链接: http://192.168.0.107/xss/level2.php
 		bsObj=BeautifulSoup(self.body,"html.parser")
 		forms=bsObj.find_all("form",method=True)
 		
-		for form in forms:
+		for form in forms: # eg: form =
+			'''eg:
+				<form action="level2.php" method="GET">
+				<input name="keyword" value=""/>
+				<input name="submit" type="submit" value="">
+				</input></form>
+			'''
 			try:
 				action=form["action"]
 			except KeyError:
@@ -83,10 +89,10 @@ class core:
 				
 			if form["method"].lower().strip() == "get":
 				Log.warning("Target have form with GET method: "+C+urljoin(self.url,action))
-				Log.info("Collecting form input key.....")
+				Log.info("Collecting form input key.....") # 收集表单的输入
 				
 				keys={}
-				for key in form.find_all(["input","textarea"]):
+				for key in form.find_all(["input","textarea"]): # 两种属性
 					try:
 						if key["type"] == "submit":
 							Log.info("Form key name: "+G+key["name"]+N+" value: "+G+"<Submit Confirm>")
@@ -104,7 +110,7 @@ class core:
 						except KeyError as e:
 							Log.info("Internal error: "+str(e))
 						
-				Log.info("Sending payload (GET) method...")
+				Log.info("Sending payload (GET) method...") # 发送请求
 				req=self.session.get(urljoin(self.url,action),params=keys)
 				if self.payload in req.text:
 					Log.high("Detected XSS (GET) at "+urljoin(self.url,req.url))
@@ -134,10 +140,7 @@ class core:
 					Log.info("Query (GET) : "+query_all)
 					
 					_respon=self.session.get(test)  # 发送了2次请求,一次是原生的请求 一次是url编码后的请求
-					# if self.payload in _respon.text or self.payload in self.session.get(query_all): # 漏洞是否存在的判断
-					if self.payload in self.session.get(query_all).text:
-						# 1.payload出现在源码中
-						# 2.
+					if self.payload in _respon.text or self.payload in self.session.get(query_all).text: # 漏洞是否存在的判断:payload是否出现在源码中
 						# print('-------------')
 						# print(self.session.get(query_all)) # eg: <Response [200]>
 						# print(type(self.session.get(query_all))) # eg: <class 'requests.models.Response'>
